@@ -1,9 +1,8 @@
 # render.yaml
 services:
   - type: web
-    name: biblioteca-app
+    name: BibliotecaDeLibros
     env: python
-    # Nueva sintaxis para buildCommand: todo en una línea con '&&'
     buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
     startCommand: gunicorn Biblioteca.wsgi:application
     envVars:
@@ -11,5 +10,6 @@ services:
         sync: false
       - key: DEBUG
         value: "False"
+      # ¡IMPORTANTE! Actualiza esta URL con la URL del nuevo servicio de Render que crearás
       - key: ALLOWED_HOSTS
-        value: "https://biblioteca-app-i0l8.onrender.com/"
+        value: "https://biblioteca-app-nueva-tu_id.onrender.com/" # EJEMPLO: CAMBIA ESTO
