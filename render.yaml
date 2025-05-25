@@ -1,0 +1,18 @@
+# render.yaml
+services:
+  - type: web
+    name: biblioteca-app  # Asegúrate de que este nombre coincida con el nombre de tu servicio en Render
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn Biblioteca.wsgi:application
+    preDeployCommand: |
+      python manage.py migrate
+      python manage.py collectstatic --noinput
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: DEBUG
+        value: "False"
+      # La DATABASE_URL se añade automáticamente por Render cuando vinculas,
+      # o puedes ponerla aquí también si la añades manualmente.
+      # Pero no es estrictamente necesario si ya la pusiste como variable de entorno manual.
