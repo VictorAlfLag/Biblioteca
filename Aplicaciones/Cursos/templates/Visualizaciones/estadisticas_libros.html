@@ -1,0 +1,147 @@
+{% extends "plantilla1.html" %}
+
+{% block body %}
+<style>
+    .chart-container {
+        width: 80%;
+        max-width: 800px;
+        margin: 50px auto;
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .statistics-header .h4-custom {
+        color:rgb(234, 145, 11); 
+        margin-bottom: 20px;
+        border-bottom: 2px solid #ffa000; 
+        display: inline-block;
+        padding: 0 10px 5px 10px;
+        border-radius: 5px;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .statistics-header .h1-custom {
+        color: #333;
+        font-size: 3.5rem;
+        margin-bottom: 50px;
+        font-weight: bold;
+    }
+
+    .container-fluid.statistics-section-bg {
+        background-color: #ffe0b2; 
+    }
+</style>
+
+<div class="container-fluid py-5 statistics-section-bg">
+    <div class="container py-5">
+        <div class="mx-auto text-center wow fadeIn statistics-header" data-wow-delay="0.1s" style="max-width: 700px;">
+            <h4 class="mb-4 h4-custom">Estadísticas</h4>
+            <h1 class="mb-5 display-3">Distribución de Libros</h1>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const conteoInicial = {{ conteo_inicial }};
+    const conteoBasica = {{ conteo_basica }};
+    const conteoBachillerato = {{ conteo_bachillerato }};
+
+    const colorInicial = '{{ color_inicial }}';
+    const colorBasica = '{{ color_basica }}';
+    const colorBachillerato = '{{ color_bachillerato }}';
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Inicial', 'Básica', 'Bachillerato'],
+            datasets: [{
+                label: 'Número de Libros',
+                data: [conteoInicial, conteoBasica, conteoBachillerato],
+                backgroundColor: [
+                    colorInicial,
+                    colorBasica,
+                    colorBachillerato
+                ],
+                borderColor: [
+                    colorInicial,
+                    colorBasica,
+                    colorBachillerato
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Cantidad de Libros',
+                        color: '#333'
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        color: '#555'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Categoría de Libros',
+                        color: '#333'
+                    },
+                    ticks: {
+                        color: '#555'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Conteo Total por Nivel Educativo',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    },
+                    color: '#333'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += context.raw;
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

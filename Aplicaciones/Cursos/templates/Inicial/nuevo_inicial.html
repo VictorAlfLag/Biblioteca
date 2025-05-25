@@ -1,0 +1,115 @@
+{% extends "plantilla2.html" %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <form action="{% url 'guardarLibroInicial' %}" enctype="multipart/form-data" method="post" id="frm_libro_inicial">
+                {% csrf_token %}
+                <label for="titulo">Título: <br></label>
+                <input type="text" name="titulo" class="form-control" id="titulo" placeholder="Ingrese el título del libro">
+
+                <label for="autor">Autor: <br></label>
+                <input type="text" name="autor" class="form-control" id="autor" placeholder="Ingrese el nombre del autor">
+
+                <label for="fecha_publicacion">Fecha de Publicación: <br></label>
+                <input type="date" name="fecha_publicacion" class="form-control" id="fecha_publicacion">
+
+                <label for="imagen">Imagen: <br></label>
+                <input type="file" name="imagen" id="imagen" accept="image/*" class="form-control">
+
+                <label for="categoria">Categoría: <br></label>
+                <input type="text" name="categoria" class="form-control" id="categoria" placeholder="Ingrese la categoría">
+
+                <label for="descripcion">Descripción: <br></label>
+                <textarea name="descripcion" class="form-control" id="descripcion" placeholder="Ingrese una descripción del libro"></textarea>
+
+                <label for="documento">Documento: <br></label>
+                <input type="file" name="documento" id="documento" accept=".pdf,.doc,.docx" class="form-control">
+
+                <br>
+                <button type="submit" class="btn btn-success">Guardar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $.validator.addMethod('lettersonly', function (value, element) {
+        return this.optional(element) || /^[a-zA-Z\s]*$/.test(value);
+    }, 'Solo se permiten letras en este campo');
+
+    $('#frm_libro_inicial').validate({
+        rules: {
+            titulo: {
+                required: true,
+                minlength: 3,
+                maxlength: 255,
+            },
+            autor: {
+                required: true,
+                lettersonly: true,
+                minlength: 3,
+                maxlength: 150,
+            },
+            fecha_publicacion: {
+                required: true,
+                date: true,
+            },
+            imagen: {
+                required: true,
+            },
+            categoria: {
+                required: true,
+                lettersonly: true,
+                minlength: 3,
+                maxlength: 100,
+            },
+            descripcion: {
+                required: true,
+                minlength: 10,
+            },
+            documento: {
+                required: true,
+                accept: "application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            },
+        },
+        messages: {
+            titulo: {
+                required: 'El título es obligatorio',
+                minlength: 'El título debe tener al menos 3 caracteres',
+                maxlength: 'El título debe tener menos de 255 caracteres',
+            },
+            autor: {
+                required: 'El autor es obligatorio',
+                lettersonly: 'Solo se permiten letras en este campo',
+                minlength: 'El autor debe tener al menos 3 caracteres',
+                maxlength: 'El autor debe tener menos de 150 caracteres',
+            },
+            fecha_publicacion: {
+                required: 'La fecha de publicación es obligatoria',
+            },
+            imagen: {
+                required: 'La imagen es obligatoria',
+            },
+            categoria: {
+                required: 'La categoría es obligatoria',
+                lettersonly: 'Solo se permiten letras en este campo',
+                minlength: 'La categoría debe tener al menos 3 caracteres',
+                maxlength: 'La categoría debe tener menos de 100 caracteres',
+            },
+            descripcion: {
+                required: 'La descripción es obligatoria',
+                minlength: 'La descripción debe tener al menos 10 caracteres',
+            },
+            documento: {
+                required: 'El documento es obligatorio',
+                accept: 'Solo se permiten documentos en formato PDF, DOC o DOCX',
+            },
+        },
+    });
+</script>
+
+{% endblock %}
+

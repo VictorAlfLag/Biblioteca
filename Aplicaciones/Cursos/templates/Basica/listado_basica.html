@@ -1,0 +1,83 @@
+{% extends "plantilla2.html" %}
+{% block body %}
+
+<style>
+    .table-bordered > :not(caption) > * > * {
+        border-width: 0 var(--bs-border-width);
+        color: rgb(0, 0, 12);
+    }
+</style>
+
+<br>
+<div class="card">
+    <div class="card-title text-center">
+        <h3><b>Listado de Libros para Básica</b></h3>
+    </div>
+</div>  
+<br>
+<div style="text-align: center;">
+    <a href="{% url 'nuevoLibroBasica' %}" class="btn btn-success">Agregar Libro</a>
+    <button class="btn btn-primary" onclick="printTable()">Imprimir Reporte</button>
+</div>
+<table class="table table-bordered table-striped table-hover text-center" id="tbl-libros-basica"> 
+    <thead>
+        <tr>
+            <th>Id del Libro</th>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Fecha de Publicación</th>
+            <th>Imagen</th>
+            <th>Categoría</th>
+            <th>Descripción</th>
+            <th>Documento</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for libro in listado_libros_basica %}
+        <tr>
+            <td>{{ libro.id_libro }}</td>
+            <td>{{ libro.titulo }}</td>
+            <td>{{ libro.autor }}</td>
+            <td>{{ libro.fecha_publicacion }}</td>
+            <td>
+                {% if libro.imagen %}
+                <img src="{{ libro.imagen.url }}" alt="{{ libro.titulo }}" width="100">
+                {% else %}
+                No disponible
+                {% endif %}
+            </td>
+            <td>{{ libro.categoria }}</td>
+            <td>{{ libro.descripcion }}</td>
+            <td>
+                <a href="{% url 'editarLibroBasica' libro.id_libro %}" class="btn btn-warning">Editar</a>
+                <a href="{% url 'eliminarLibroBasica' libro.id_libro %}" onclick="return confirm('¿Estás seguro de eliminar?')" class="btn btn-danger">Eliminar</a>
+            </td>
+            <td>
+                {% if libro.documento %}
+                <a href="{{ libro.documento.url }}" target="_blank" class="btn btn-info">Ver Documento</a>
+                {% else %}
+                No disponible
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function() {
+        $('#tbl-libros-basica').DataTable();
+    });
+
+    function printTable() {
+        var printContents = document.getElementById('tbl-libros-basica').outerHTML;
+        var originalContents = document.body.innerHTML;
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
+        location.reload();
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Biblioteca Registro</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+    <!--IMPORTANDO JQUERY-->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <!--IMPORTANDO BOOTSTRAP-->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <!--IMPORTANDO DATATABLES-->
+  <link rel="stylesheet" href="//cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
+  <script src="//cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+  <!--IMPORTANDO SWEETALERT-->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!--IMPORTANDO JQUERY VALIDATE DESDE MI CARPETA STATIC-->
+  <script src="{% static 'librerias/jquery-validation/dist/jquery.validate.min.js' %}"></script>
+  <!--IMPORTANDO FONTAWESOME PARA ICONOS-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!--IMPORTANDO FileInput .js MANEJO DE IMAGENES AL INGRESO -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kartik-v/bootstrap-fileinput@5.5.0/css/fileinput.min.css">
+  <script  src="https://cdn.jsdelivr.net/gh/kartik-v/bootstrap-fileinput@5.5.0/js/fileinput.min.js"></script>
+
+  <!-- Favicons -->
+  <link href="{% static 'Plantilla/iPortfolio-1.0.0/assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'Plantilla/iPortfolio-1.0.0/assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'Plantilla/iPortfolio-1.0.0/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'Plantilla/iPortfolio-1.0.0/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'Plantilla/iPortfolio-1.0.0/assets/vendor/aos/aos.css' %}" rel="stylesheet">
+  <link href="{% static 'Plantilla/iPortfolio-1.0.0/assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+  <link href="{% static 'Plantilla/iPortfolio-1.0.0/assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'Plantilla/iPortfolio-1.0.0/assets/css/main.css' %}" rel="stylesheet">
+</head>
+
+<body class="index-page">
+
+  <header id="header" class="header dark-background d-flex flex-column">
+    <i class="header-toggle d-xl-none bi bi-list"></i>
+
+    <div class="profile-img">
+      <img src="{% static 'Plantilla/iPortfolio-1.0.0/assets/img/sello.jpg' %}" alt="" class="img-fluid rounded-circle">
+    </div>
+
+    <a href="{% url 'registro' %}" class="logo d-flex align-items-center justify-content-center">
+      <h1 class="sitename">Unidad Educativa Toacaso</h1>
+    </a>
+
+    <div class="social-links text-center">
+      <a href="#" class="twitter"><i class="bi bi-twitter-x"></i></a>
+      <a href="https://www.facebook.com/p/Unidad-Educativa-Toacaso-100064194002155/?locale=es_LA" class="facebook"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="google-plus"><i class="bi bi-skype"></i></a>
+      <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+    </div>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="{% url 'home1' %}" class="active"><i class="bi bi-house navicon"></i>Home</a></li>
+        <li><a href="{% url 'listado_libros_inicial' %}"><i class="bi bi-file-earmark-text navicon"></i> Inicial</a></li>
+        <li><a href="{% url 'listado_libros_basica' %}"><i class="bi bi-file-earmark-text navicon"></i> Basica</a></li>
+        <li><a href="{% url 'listado_libros_bachillerato' %}"><i class="bi bi-file-earmark-text navicon"></i> Bachillerato</a></li>
+        <li><a href="{% url 'registro' %}"><i class="bi bi-hdd-stack navicon"></i> Registro Usuario</a></li>
+        <li><a href="{% url 'home' %}"><i class="bi bi-hdd-stack navicon"></i> SALIR</a></li>
+      </ul>
+    </nav>
+
+  </header>
+
+  <main class="main">
+{% block body %}
+{% endblock %}
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/aos/aos.js' %}"></script>
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/typed.js/typed.umd.js' %}"></script>
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/waypoints/noframework.waypoints.js' %}"></script>
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js' %}"></script>
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'Plantilla/iPortfolio-1.0.0/assets/js/main.js' %}"></script>
+  <style>
+    label.error{
+        color: red;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .form-control.error{
+        border: 1px solid red;
+    }
+</style>
+</body>
+    <!-- Popper and Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9gybBogGzA9F9EZGpGSa4l1i6VKT9LhgIz9TwPh7jR7x0K6tzl2" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-jL6AsoAyATXfQF4YF7+M56jQlMQuhLXtgm7x4e6c06srQqK0qlJZPz1FBIfl8sr" crossorigin="anonymous"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+
+    <!--Letras de color rojo errores -->
+    <style>
+        label.error{
+            color: red;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .form-control.error{
+            border: 1px solid red;
+        }
+    </style>
+
+</html>

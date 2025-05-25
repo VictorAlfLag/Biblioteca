@@ -1,0 +1,233 @@
+{% extends "plantilla1.html" %}
+
+{% block body %}
+<style>
+    /* ---------------------------------------------------- */
+    /* ESTILOS ESPECÍFICOS PARA LA SECCIÓN DE BACHILLERATO */
+    /* ---------------------------------------------------- */
+
+    /* Fondo de la sección completa de bachillerato */
+    .container-fluid.events {
+        background-color: #e3f2fd; /* Azul claro personalizado */
+    }
+
+    /* Color del título "Libros de Bachillerato" */
+    .events .title-border-radius {
+        color: #1976d2 !important; /* Azul oscuro personalizado */
+        border-color: #1976d2 !important; /* Borde del mismo color */
+    }
+
+    /* Color de fondo de los "cards" de los libros (antes bg-primary) */
+    .events-item {
+        background-color: #2196f3; /* Azul medio para el fondo del card */
+        border-radius: 10px; /* Bordes redondeados del card */
+        overflow: hidden; /* Importante para que el contenido no se salga */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 25px; /* Espacio entre cards */
+    }
+
+    /* Color de fondo de la barra de la fecha/categoría (antes bg-secondary) */
+    .events-inner .bg-secondary {
+        background-color: #90caf9 !important; /* Un azul intermedio claro para la barra */
+        display: flex; /* Asegura que el texto y los íconos se distribuyan */
+        justify-content: space-between;
+        padding: 10px 15px;
+        margin-top: 20px; /* Separación del óvalo de la imagen */
+    }
+
+    /* Color de los iconos (calendario, marcador) en la barra de fecha/categoría (antes text-primary) */
+    .events-inner .bg-secondary .text-primary {
+        color: #1976d2 !important; /* Color oscuro para los iconos */
+    }
+
+    /* Estilo del texto del card (fondo blanco) */
+    .events-text {
+        background-color: white;
+        padding: 20px;
+        border: 1px solid #2196f3; /* Borde del card al mismo color que el fondo */
+        border-top: none; /* Se une con la barra superior */
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    /* Estilo del botón "Ver Documento" (antes btn-primary) */
+    .events-text .btn-primary {
+        background-color: #1976d2; /* Azul oscuro para el botón */
+        border-color: #1976d2;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+    }
+
+    .events-text .btn-primary:hover {
+        background-color: #1565c0; /* Azul más oscuro al pasar el mouse */
+        border-color: #1565c0;
+    }
+
+    /* Estilo del botón "No Disponible" (antes btn-secondary) */
+    .events-text .btn-secondary {
+        background-color: #ccc;
+        border-color: #ccc;
+        color: #666;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        cursor: not-allowed;
+    }
+
+    /* ---------------------------------------------------- */
+    /* AJUSTE DE IMÁGENES (OVALADAS) */
+    /* ---------------------------------------------------- */
+
+    /* 1. ESTILO PARA EL CONTENEDOR OVALADO DE LA IMAGEN (.events-img) */
+    /* Este div es tu "ventana" a través de la cual se ve la imagen. */
+    /* Lo hemos hecho un óvalo horizontal, similar a tus ejemplos. */
+    .events-img {
+        width: 300px;  /* ANCHO fijo del óvalo. Ajusta este valor si quieres que el óvalo sea más ancho o estrecho. */
+        height: 180px; /* ALTO fijo del óvalo. Ajusta este valor. Es menor que el ancho para una forma ovalada. */
+        border-radius: 50%; /* Esto crea la forma OVALADA con los anchos y altos definidos. */
+        overflow: hidden; /* ¡CLAVE! Cualquier parte de la imagen que exceda este óvalo será CORTADA. */
+        position: relative; /* Necesario para que el overlay (lupa) y la fecha se posicionen correctamente. */
+        margin: 20px auto 0 auto; /* Centra el óvalo dentro de su columna y da un margen superior */
+        border: 5px solid #2196f3; /* Borde del óvalo, color de tu tema */
+    }
+
+    /* 2. ESTILO PARA LA IMAGEN DENTRO DEL CONTENEDOR OVALADO (.events-img img) */
+    /* Este es el elemento <img> real. */
+    .events-img img {
+        width: 100%; /* La imagen ocupará el 100% del ANCHO de su contenedor ovalado */
+        height: 100%; /* La imagen ocupará el 100% del ALTO de su contenedor ovalado */
+        object-fit: cover; /* ¡CLAVE! Escala la imagen para CUBRIR completamente el área del óvalo.
+                                Recorta las partes sobrantes si es necesario, manteniendo la proporción y llenando el espacio. */
+        object-position: center; /* Si la imagen se recorta, asegura que el CENTRO de la imagen sea visible. */
+    }
+
+    /* Estilo para el overlay de la lupa */
+    .event-overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        display: flex; /* Para centrar la lupa */
+        justify-content: center; /* Centrar horizontalmente */
+        align-items: center; /* Centrar verticalmente */
+        background: rgba(0, 0, 0, 0.5); /* Fondo semitransparente al pasar el mouse */
+        opacity: 0; /* Oculto por defecto */
+        transition: opacity 0.5s ease; /* Transición suave para la opacidad */
+        border-radius: 50%; /* Asegura que la superposición también sea ovalada */
+    }
+
+    .events-img:hover .event-overlay {
+        opacity: 1; /* Se muestra al pasar el mouse sobre la imagen */
+    }
+
+    /* ---------------------------------------------------- */
+    /* AJUSTES PARA EL CARTEL DE LA FECHA SOBREPUESTO */
+    /* ---------------------------------------------------- */
+    .events-inner .events-rate {
+        position: absolute; /* Permite posicionarlo libremente */
+        top: 0; /* Lo coloca en la parte superior */
+        right: 20px; /* Desplazado 20px desde la derecha */
+        padding: 8px 15px; /* Espacio interno */
+        background-color: #64b5f6 !important; /* Color de fondo azul intermedio */
+        color: white; /* Color del texto */
+        border-bottom-left-radius: 10px; /* Redondea la esquina inferior izquierda */
+        border-bottom-right-radius: 10px; /* Redondea la esquina inferior derecha */
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        z-index: 10; /* Asegura que esté por encima de la imagen */
+        font-weight: bold; /* Texto en negrita */
+        text-align: center; /* Centra el texto */
+    }
+    /* Dentro del bloque <style> de ver_inicial.html */
+
+    /* Estilo del botón "Buscar" del buscador */
+    .events-text .btn-primary, /* Esto ya controla el botón "Ver Documento" */
+    .input-group .btn-primary { /* AÑADE ESTO para el botón del buscador */
+        background-color: #007bff; /* Azul primario para el botón de buscar */
+        border-color: #007bff;
+        color: white;
+        /* Las demás propiedades como padding, border-radius, etc., ya las tienes en .events-text .btn-primary */
+    }
+
+    .events-text .btn-primary:hover, /* Esto ya controla el hover del botón "Ver Documento" */
+    .input-group .btn-primary:hover { /* AÑADE ESTO para el hover del botón del buscador */
+        background-color: #0056b3; /* Azul más oscuro al pasar el mouse */
+        border-color: #0056b3;
+    }
+    /* Dentro del bloque <style> de ver_inicial.html */
+
+    /* Para el campo de texto del buscador cuando está enfocado */
+    .input-group .form-control:focus {
+        border-color: #007bff; /* Color del borde al enfocar (tu azul primario) */
+        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Efecto de sombra (tu azul primario con opacidad) */
+        outline: 0; /* Quita el outline predeterminado del navegador */
+    }
+
+    l resto de tus estilos para Inicial se mantienen igual */
+    /* El resto de tus estilos para Inicial (fondo de sección, cards, etc.) se mantienen igual */
+</style>
+
+<div class="container-fluid events py-5" style="background-color:rgb(210, 234, 250);">
+    <div class="container py-5">
+        <div class="mx-auto text-center wow fadeIn" data-wow-delay="0.1s" style="max-width: 700px;">
+            <h4 class="mb-4 border-bottom border-primary border-2 d-inline-block p-2 title-border-radius" style="color:rgb(0, 119, 238) !important;">
+                Libros de Básica
+            </h4>
+            <h1 class="mb-5 display-3">Nuestros Libros para Básica</h1>
+        </div>
+        <div class="row mb-4 justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <form action="" method="GET" class="input-group">
+                    <input type="text" class="form-control" name="q" placeholder="Buscar libro por título o autor..." aria-label="Buscar libro" value="{{ query|default_if_none:'' }}">
+                    <button class="btn btn-primary" type="submit">Buscar</button>
+                </form>
+            </div>
+        </div>
+        <div class="row g-5 justify-content-center">
+            {% for libro in libros_basica %}
+            <div class="col-md-6 col-lg-6 col-xl-4 wow fadeIn" data-wow-delay="0.1s">
+                <div class="events-item rounded"> <div class="events-inner position-relative">
+                        <div class="events-img overflow-hidden rounded-circle position-relative">
+                            {% if libro.imagen %}
+                            <img src="{{ libro.imagen.url }}" alt="{{ libro.titulo }}">
+                            {% else %}
+                            <img src="/static/img/default-book.jpg" alt="Imagen no disponible">
+                            {% endif %}
+                            <div class="event-overlay">
+                                <a href="{{ libro.imagen.url }}" data-lightbox="event-1">
+                                    <i class="fas fa-search-plus text-white fa-2x"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="px-4 py-2 bg-secondary text-white text-center events-rate">
+                            {{ libro.fecha_publicacion|date:"d M" }}
+                        </div>
+                        <div class="d-flex justify-content-between px-4 py-2 bg-secondary">
+                            <small class="text-white"><i class="fas fa-calendar me-1 text-primary"></i> {{ libro.fecha_publicacion|date:"Y" }}</small>
+                            <small class="text-white"><i class="fas fa-bookmark me-1 text-primary"></i> {{ libro.categoria }}</small>
+                        </div>
+                    </div>
+                    <div class="events-text p-4 border border-primary bg-white border-top-0 rounded-bottom">
+                        <a href="#" class="h4">{{ libro.titulo }}</a>
+                        <p class="mb-0 mt-3">{{ libro.descripcion|slice:":150" }}...</p>
+                        <div class="mt-3">
+                            {% if libro.documento %}
+                            <a href="{{ libro.documento.url }}" class="btn btn-primary" target="_blank">
+                                <i class="fas fa-file-pdf me-2"></i> Ver Documento
+                            </a>
+                            {% else %}
+                            <button class="btn btn-secondary" disabled><i class="fas fa-file-pdf me-2"></i> No Disponible</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

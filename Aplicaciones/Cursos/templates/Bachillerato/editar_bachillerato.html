@@ -1,0 +1,121 @@
+{% extends "plantilla.html" %}
+
+{% block body %}
+<h1>EDITAR LIBRO DE BACHILLERATO</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <form action="{% url 'procesoActualizarLibroBachillerato' %}" method="post" enctype="multipart/form-data" id="frm_libro_bachillerato">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ libro.id_libro }}">
+                
+                <label for="titulo"><b>Título:</b></label>
+                <input type="text" name="titulo" class="form-control" value="{{ libro.titulo }}" id="titulo" placeholder="Ingrese el título del libro">              
+
+                <label for="autor"><b>Autor:</b></label>
+                <input type="text" name="autor" class="form-control" value="{{ libro.autor }}" id="autor" placeholder="Ingrese el nombre del autor">            
+
+                <label for="fecha_publicacion"><b>Fecha de Publicación:</b></label>
+                <input type="date" name="fecha_publicacion" class="form-control" value="{{ libro.fecha_publicacion|date:"Y-m-d" }}">                
+
+                <label for="imagen"><b>Imagen:</b></label>
+                <input type="file" name="imagen" id="imagen" accept="image/*" class="form-control">
+                {% if libro.imagen %}
+                    <p>Imagen actual: <a href="{{ libro.imagen.url }}" target="_blank">Ver Imagen</a></p>
+                {% endif %}
+
+                <label for="categoria"><b>Categoría:</b></label>
+                <input type="text" name="categoria" class="form-control" value="{{ libro.categoria }}" id="categoria" placeholder="Ingrese la categoría">             
+
+                <label for="descripcion"><b>Descripción:</b></label>
+                <textarea name="descripcion" class="form-control" id="descripcion" placeholder="Ingrese una descripción del libro">{{ libro.descripcion }}</textarea>
+
+                <label for="documento"><b>Documento:</b></label>
+                {% if libro.documento %}
+                    <p>Documento actual: <a href="{{ libro.documento.url }}" target="_blank">Ver Documento</a></p>
+                {% endif %}
+                <input type="file" name="documento" id="documento" accept=".pdf,.doc,.docx" class="form-control">
+                
+                <br>
+                <button type="submit" class="btn btn-warning">Actualizar</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="{% url 'listado_libros_bachillerato' %}">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+<br>
+
+<script type="text/javascript">
+    $('#frm_libro_bachillerato').validate({
+        rules: {
+            titulo: {
+                required: true,
+                minlength: 3,
+                maxlength: 255,
+            },
+            autor: {
+                required: true,
+                lettersonly: true,
+                minlength: 3,
+                maxlength: 150,
+            },
+            fecha_publicacion: {
+                required: true,
+                date: true,
+            },
+            imagen: {
+                required: false,  
+            },
+            categoria: {
+                required: true,
+                lettersonly: true,
+                minlength: 3,
+                maxlength: 100,
+            },
+            descripcion: {
+                required: true,
+                minlength: 10,
+            },
+            documento: {
+                required: false,
+                extension: "pdf|doc|docx",
+            },
+        },
+        messages: {
+            titulo: {
+                required: 'El título es obligatorio',
+                minlength: 'El título debe tener al menos 3 caracteres',
+                maxlength: 'El título debe tener menos de 255 caracteres',
+            },
+            autor: {
+                required: 'El autor es obligatorio',
+                lettersonly: 'Solo se permiten letras en este campo',
+                minlength: 'El autor debe tener al menos 3 caracteres',
+                maxlength: 'El autor debe tener menos de 150 caracteres',
+            },
+            fecha_publicacion: {
+                required: 'La fecha de publicación es obligatoria',
+            },
+            imagen: {
+                required: 'La imagen es obligatoria', 
+            },
+            categoria: {
+                required: 'La categoría es obligatoria',
+                lettersonly: 'Solo se permiten letras en este campo',
+                minlength: 'La categoría debe tener al menos 3 caracteres',
+                maxlength: 'La categoría debe tener menos de 100 caracteres',
+            },
+            descripcion: {
+                required: 'La descripción es obligatoria',
+                minlength: 'La descripción debe tener al menos 10 caracteres',
+            },
+            documento: {
+                required: 'El documento es obligatorio',
+                extension: 'Solo se permiten archivos en formato PDF, DOC o DOCX',
+            },
+        },
+    });
+</script>
+
+{% endblock %}
