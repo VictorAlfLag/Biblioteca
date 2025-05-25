@@ -15,15 +15,15 @@ def home1(request):
 
 def listadoLibrosInicial(request):
     libros_inicial = LibrosInicial.objects.all()
-    return render(request, "Inicial/listado_inicial.html", {'listado_libros_inicial': libros_inicial})
+    return render(request, "inicial/listado_inicial.html", {'listado_libros_inicial': libros_inicial})
 
 def listadoLibrosBasica(request):
     libros_basica = LibrosBasica.objects.all()
-    return render(request, "Basica/listado_basica.html", {'listado_libros_basica': libros_basica})
+    return render(request, "basica/listado_basica.html", {'listado_libros_basica': libros_basica})
 
 def listadoLibrosBachillerato(request):
     libros_bachillerato = LibrosBachillerato.objects.all()
-    return render(request, "Bachillerato/listado_bachillerato.html", {'listado_libros_bachillerato': libros_bachillerato})
+    return render(request, "bachillerato/listado_bachillerato.html", {'listado_libros_bachillerato': libros_bachillerato})
 
 def nuevoLibroInicial(request):
     if request.method == 'POST':
@@ -45,7 +45,7 @@ def nuevoLibroInicial(request):
         )
         libro.save()
         return redirect('listado_libros')  
-    return render(request, 'Inicial/nuevo_inicial.html')
+    return render(request, 'inicial/nuevo_inicial.html')
 
 
 def nuevoLibroBasica(request):
@@ -69,7 +69,7 @@ def nuevoLibroBasica(request):
         libro.save()
         return redirect('listado_libros')
 
-    return render(request, 'Basica/nuevo_basica.html')
+    return render(request, 'basica/nuevo_basica.html')
 
 
 def nuevoLibroBachillerato(request):
@@ -92,7 +92,7 @@ def nuevoLibroBachillerato(request):
         )
         libro.save()
         return redirect('listado_libros')
-    return render(request, 'Bachillerato/nuevo_bachillerato.html')
+    return render(request, 'bachillerato/nuevo_bachillerato.html')
 
 def guardarLibroInicial(request):
     titulo = request.POST['titulo']
@@ -190,7 +190,7 @@ def editarLibroBachillerato(request, id):
         libro_bachillerato.save()
         messages.success(request, "Libro actualizado correctamente.")
         return redirect('listado_libros_bachillerato')
-    return render(request, 'Bachillerato/editar_bachillerato.html', {'libro': libro_bachillerato})
+    return render(request, 'bachillerato/editar_bachillerato.html', {'libro': libro_bachillerato})
 
 
 
@@ -210,7 +210,7 @@ def editarLibroBasica(request, id):
             libro_basica.documento = request.FILES['documento']      
         libro_basica.save()
         return redirect('listado_libros_basica')
-    return render(request, 'Basica/editar_basica.html', {'libro': libro_basica})
+    return render(request, 'basica/editar_basica.html', {'libro': libro_basica})
 
 def editarLibroInicial(request, id):
     libro_inicial = get_object_or_404(LibrosInicial, id_libro=id)   
@@ -228,7 +228,7 @@ def editarLibroInicial(request, id):
             libro_inicial.documento = request.FILES['documento']       
         libro_inicial.save()
         return redirect('listado_libros_inicial')  
-    return render(request, 'Inicial/editar_inicial.html', {'libro': libro_inicial})
+    return render(request, 'inicial/editar_inicial.html', {'libro': libro_inicial})
 
 
 def procesoActualizarLibroInicial(request):
@@ -408,10 +408,10 @@ def registro_usuario(request):
             return redirect('home1') 
         else:
             messages.error(request, "Por favor corrige los errores del formulario.")
-            return render(request, 'Login/registro.html', {'form': form})
+            return render(request, 'login/registro.html', {'form': form})
     else:
         form = RegistroUsuarioForm()
-    return render(request, 'Login/registro.html', {'form': form})
+    return render(request, 'login/registro.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
