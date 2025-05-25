@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from pathlib import Path
 from django.contrib.messages import constants as message_constants
+import dj_database_url
 
 MESSAGE_TAGS = {
     message_constants.ERROR: 'error',
@@ -26,16 +27,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-s=ijw7-8rm4r70q+6$n_3874g645ck$9$)3ogjj6w21#9ew5wu'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-s=ijw7-8rm4r70q+6$n_3874g645ck$9$)3ogjj6w21#9ew5wu')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+if not DEBUG:
+    ALLOWED_HOSTS += ['.onrender.com']
 
 
 # Application definition
-LOGIN_REDIRECT_URL = 'home'  # Página a la que se redirige después de iniciar sesión
+LOGIN_REDIRECT_URL = 'home'    # Página a la que se redirige después de iniciar sesión
 LOGOUT_REDIRECT_URL = 'login'  # Página a la que se redirige después de cerrar sesión
 
 INSTALLED_APPS = [
@@ -50,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Añadido para servir estáticos en producción
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -70,7 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+                'django.contrib.messages.context_processors.messages', 
             ],
         },
     },
@@ -83,10 +87,11 @@ WSGI_APPLICATION = 'Biblioteca.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'BDD.Biblioteca.db',
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL', 'sqlite:///' + os.path.join(BASE_DIR, 'BDD.Biblioteca.db')),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 
@@ -128,11 +133,15 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'Biblioteca/static'),)
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'Biblioteca/static')]
+
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'Biblioteca/media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
