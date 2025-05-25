@@ -3,16 +3,19 @@ services:
   - type: web
     name: biblioteca-app
     env: python
-    # AÑADE LOS COMANDOS AQUI:
+    # buildCommand y su contenido deben tener 2 espacios de indentación respecto al '-' de services
     buildCommand: |
+      # Estas líneas deben tener 4 espacios de indentación respecto al '-' de services
       pip install -r requirements.txt
       python manage.py migrate
       python manage.py collectstatic --noinput
+    # startCommand y envVars deben tener 2 espacios de indentación respecto al '-' de services
     startCommand: gunicorn Biblioteca.wsgi:application
-    # LA SECCIÓN preDeployCommand YA NO DEBE ESTAR AQUÍ
     envVars:
       - key: SECRET_KEY
         sync: false
       - key: DEBUG
         value: "False"
-      # ... tus otras variables de entorno como DATABASE_URL, ALLOWED_HOSTS, etc.
+      # Asegúrate de que esta URL sea la de tu servicio en Render (la que empieza con https://)
+      - key: ALLOWED_HOSTS
+        value: "https://biblioteca-app-i0l8.onrender.com/"
