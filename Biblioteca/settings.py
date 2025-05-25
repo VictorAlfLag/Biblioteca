@@ -29,13 +29,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-s=ijw7-8rm4r70q+6$n_3874g645ck$9$)3ogjj6w21#9ew5wu')
 
+# settings.py
+# ...
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+# Asegúrate de que en Render la variable DEBUG esté como 'False' (cadena de texto)
+DEBUG = (os.environ.get('DEBUG', 'False').lower() == 'true') # Mejorada para leer la variable de entorno
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-if not DEBUG:
-    ALLOWED_HOSTS += ['.onrender.com']
-
+# ALLOWED_HOSTS
+ALLOWED_HOSTS = []
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+ALLOWED_HOSTS += ['localhost', '127.0.0.1'] # Para desarrollo local
+# ...
 
 # Application definition
 LOGIN_REDIRECT_URL = 'home'    # Página a la que se redirige después de iniciar sesión
