@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-s=ijw7-8rm4r70q+6$n_3
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Asegúrate de que en Render la variable DEBUG esté como 'False' (cadena de texto)
-DEBUG = (os.environ.get('DEBUG', 'False').lower() == 'true') 
+DEBUG = (os.environ.get('DEBUG', 'False').lower() == 'true')
 
 # ALLOWED_HOSTS
 ALLOWED_HOSTS = []
@@ -53,12 +53,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Aplicaciones.Cursos',
-    'storages', # ¡Importante! Asegúrate de que 'storages' esté aquí para AWS S3
+    'storages', # Importante para AWS S3
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ¡Importante! Debe estar aquí, después de SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Debe estar aquí, después de SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -79,7 +79,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages', 
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -88,7 +88,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'Biblioteca.wsgi.application'
 
 # AWS S3 Configuration (Asegúrate que estas variables de entorno estén en Render)
-# ESTA SECCIÓN ES CRÍTICA PARA LOS ARCHIVOS MEDIA EN S3
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
@@ -98,15 +97,8 @@ AWS_DEFAULT_ACL = 'public-read' # Muy importante para que los archivos sean legi
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 
 # Configuración de almacenamiento de archivos de MEDIA (subidos por usuarios)
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' # ¡Importante! Usar S3 para media
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # ¡Importante! Esta es la URL base para S3
-
-# NOTA: MEDIA_ROOT solo se define si no usas S3 para media (es decir, si usas FileSystemStorage).
-# Dado que estás usando S3 en DEFAULT_FILE_STORAGE, MEDIA_ROOT NO debe estar aquí en producción,
-# porque los archivos no se guardan localmente, sino en S3.
-# Si necesitas un MEDIA_ROOT para desarrollo local (DEBUG=True), lo pondrías así:
-# if DEBUG:
-#     MEDIA_ROOT = BASE_DIR / 'media'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' # Usa S3 para media
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL base para S3
 
 
 DATABASES = {
@@ -159,13 +151,13 @@ STATIC_ROOT = BASE_DIR / 'staticfiles' # Uso de Path para consistencia
 
 # Si tienes archivos estáticos específicos del proyecto (que no están en las carpetas 'static' de tus apps),
 # y que Django necesita recolectar, esta línea es para eso.
-# Si tu plantilla (Plantilla/iPortfolio-1.0.0/assets/assets/vendor/aos/aos.js)
-# está en 'Biblioteca/static/' en tu estructura de carpetas, esto es correcto.
+# Con base en tus logs, la ruta de tu plantilla es 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/...'
+# Esto implica que 'Plantilla' está directamente dentro de 'Biblioteca/static/'.
 STATICFILES_DIRS = [
-    BASE_DIR / 'Biblioteca' / 'static', # Asegúrate que esta ruta es donde están tus archivos estáticos extra.
+    BASE_DIR / 'Biblioteca' / 'static',
 ]
 
-# ¡Importante! Esta línea debe estar SIEMPRE definida para Whitenoise, fuera de cualquier if DEBUG
+# Esta línea debe estar SIEMPRE definida para Whitenoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
