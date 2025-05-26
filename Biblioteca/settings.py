@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Aplicaciones.Cursos',
-    'storages', # Importante para AWS S3
+    # 'storages', # <--- COMENTADO: Desactiva el paquete storages si no usas S3
 ]
 
 MIDDLEWARE = [
@@ -87,18 +87,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Biblioteca.wsgi.application'
 
-# AWS S3 Configuration (Asegúrate que estas variables de entorno estén en Render)
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-2') # Confirma esta región
+# # INICIO: CONFIGURACIÓN DE AWS S3 (COMENTADO PARA ALMACENAMIENTO LOCAL TEMPORAL)
+# AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+# AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+# AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+# AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-2') # Confirma esta región
 
-AWS_DEFAULT_ACL = 'public-read' # Muy importante para que los archivos sean legibles públicamente
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+# AWS_DEFAULT_ACL = 'public-read' # Muy importante para que los archivos sean legibles públicamente
+# AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 
-# Configuración de almacenamiento de archivos de MEDIA (subidos por usuarios)
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' # Usa S3 para media
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL base para S3
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' # Usa S3 para media
+# MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL base para S3
+# # FIN: CONFIGURACIÓN DE AWS S3
+
+# INICIO: CONFIGURACIÓN DE ALMACENAMIENTO DE ARCHIVOS MEDIA LOCAL (TEMPORAL)
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+# FIN: CONFIGURACIÓN DE ALMACENAMIENTO DE ARCHIVOS MEDIA LOCAL
 
 
 DATABASES = {
