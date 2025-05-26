@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Aplicaciones.Cursos',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -88,7 +89,32 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Biblioteca.wsgi.application'
 
+# AWS S3 Configuration
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+# ¡IMPORTANTE! Asegúrate de que esta región coincida con la de tu bucket (us-east-2 en tu caso)
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-2') 
 
+# Si habilitaste ACL en el bucket y quieres que los archivos subidos sean públicos por defecto
+AWS_DEFAULT_ACL = 'public-read' 
+
+# Esto construye la URL base para tus archivos en S3
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+
+# **Configuración de almacenamiento de archivos de MEDIA (subidos por usuarios)**
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL donde Django buscará tus imágenes y documentos
+
+# Opcional: para servir archivos estáticos también desde S3 (requeriría un paso adicional de collectstatic a S3)
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+# STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+
+# Para desarrollo local (si no quieres usar S3 localmente mientras desarrollas), puedes añadir:
+# if DEBUG:
+#     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+#     MEDIA_URL = '/media/'
+#     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
