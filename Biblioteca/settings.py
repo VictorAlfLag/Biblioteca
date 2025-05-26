@@ -149,24 +149,31 @@ USE_TZ = True
 # Agregar configuración de mensajes
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
-# Configuración de archivos estáticos
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles' # Uso de Path para consistencia
+# ... (otras configuraciones, sin cambios) ...
 
-# Si tienes archivos estáticos específicos del proyecto (que no están en las carpetas 'static' de tus apps),
-# y que Django necesita recolectar, esta línea es para eso.
-# Con base en tus logs, la ruta de tu plantilla es 'Plantilla/iPortfolio-1.0.0/assets/assets/vendor/...'
-# Esto implica que 'Plantilla' está directamente dentro de 'Biblioteca/static/'.
+# # INICIO: CONFIGURACIÓN DE AWS S3 (COMENTADO)
+# ... (toda la configuración de AWS S3 debe seguir comentada) ...
+# # FIN: CONFIGURACIÓN DE AWS S3
+
+# INICIO: CONFIGURACIÓN DE ALMACENAMIENTO DE ARCHIVOS MEDIA LOCAL (TEMPORAL)
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+# MUY IMPORTANTE: Cambiamos MEDIA_URL y MEDIA_ROOT para que apunten a STATIC_ROOT
+# Esto hará que los archivos media se sirvan a través de /static/
+MEDIA_URL = '/static/media/' # Ahora los archivos media estarán en /static/media/
+MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media' # Apuntamos a una subcarpeta dentro de staticfiles
+# FIN: CONFIGURACIÓN DE ALMACENAMIENTO DE ARCHIVOS MEDIA LOCAL
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles' # Asegúrate de que esto siga igual
+
+# Asegúrate de que tu STATICFILES_DIRS incluya la carpeta donde se guardarán los media,
+# aunque si MEDIA_ROOT está dentro de STATIC_ROOT, no es estrictamente necesario.
 STATICFILES_DIRS = [
     BASE_DIR / 'Biblioteca' / 'static',
+    # BASE_DIR / 'media', # Ya no es necesario si MEDIA_ROOT apunta a staticfiles
 ]
 
-# Esta línea debe estar SIEMPRE definida para Whitenoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# ... (el resto del settings.py, sin cambios) ...

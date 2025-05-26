@@ -15,14 +15,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('Aplicaciones.Cursos.urls'))
-]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    path('',include('Aplicaciones.Cursos.urls')),
+]
 
-#Validacion para visualizar los archivos subidos en modo DEV
+# Configuración de archivos estáticos (Whitenoise los maneja mejor)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Configuración para archivos media (Temporal en Render, SIN if DEBUG)
+# Esta es la parte crucial para que Django sirva los archivos subidos.
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
