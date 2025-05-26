@@ -9,9 +9,7 @@ https://docs.djangoproject.com/en/4.0/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
-from whitenoise.middleware import WhiteNoiseMiddleware # Importar WhiteNoiseMiddleware
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Biblioteca.settings')
 
 application = get_wsgi_application()
-application = WhiteNoiseMiddleware(application)
