@@ -29,8 +29,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-s=ijw7-8rm4r70q+6$n_3874g645ck$9$)3ogjj6w21#9ew5wu')
 
-# settings.py
-# ...
 # SECURITY WARNING: don't run with debug turned on in production!
 # Asegúrate de que en Render la variable DEBUG esté como 'False' (cadena de texto)
 DEBUG = (os.environ.get('DEBUG', 'False').lower() == 'true') # Mejorada para leer la variable de entorno
@@ -41,11 +39,11 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 ALLOWED_HOSTS += ['localhost', '127.0.0.1'] # Para desarrollo local
-# ...
+
 
 # Application definition
-LOGIN_REDIRECT_URL = 'home'    # Página a la que se redirige después de iniciar sesión
-LOGOUT_REDIRECT_URL = 'login'  # Página a la que se redirige después de cerrar sesión
+LOGIN_REDIRECT_URL = 'home'     # Página a la que se redirige después de iniciar sesión
+LOGOUT_REDIRECT_URL = 'login'   # Página a la que se redirige después de cerrar sesión
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -55,12 +53,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Aplicaciones.Cursos',
-    'storages',
+    'storages', # AÑADIDO: Importante para S3
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Asegúrate de que esta línea esté aquí
+    'whitenoise.middleware.WhiteNoiseMiddleware', # CORRECTO: Esta línea debe estar aquí
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -99,16 +97,20 @@ AWS_DEFAULT_ACL = 'public-read' # Muy importante para que los archivos sean legi
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 
 # Configuración de almacenamiento de archivos de MEDIA (subidos por usuarios)
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL correcta para S3
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' # CORRECTO: Usar S3Boto3Storage
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # CORRECTO: Apuntar a la URL de S3
 
-# Asegúrate de que no haya un MEDIA_ROOT definido para producción
-# Si tienes MEDIA_ROOT, coméntalo o úsalo solo si DEBUG es True
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # Esto debe ser solo para desarrollo local
+# NOTA: MEDIA_ROOT solo se define si no usas S3 para media (es decir, si usas FileSystemStorage).
+# Dado que estás usando S3 en DEFAULT_FILE_STORAGE, MEDIA_ROOT NO debe estar aquí en producción,
+# porque los archivos no se guardan localmente, sino en S3.
+# Si necesitas un MEDIA_ROOT para desarrollo local (DEBUG=True), lo pondrías así:
+# if DEBUG:
+#     MEDIA_ROOT = BASE_DIR / 'media'
+
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'sqlite:///' + os.path.join(BASE_DIR, 'BDD.Biblioteca.db')),
+        default=os.getenv('DATABASE_URL', f'sqlite:///{BASE_DIR}/BDD.Biblioteca.db'), # Usamos f-string con Path
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -150,18 +152,25 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
-# Configuración de archivos estáticos
-STATIC_URL = '/static/'
-STATIC_ROOT =os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'Biblioteca/static'),)
 
-#Validations
-if not DEBUG:
-    STATICFILES_ROOT =os.path.join(BASE_DIR,'staticfiles')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-# ...
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'Biblioteca/media')
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles' # CORREGIDO: Uso de Path para consistencia
+
+# Si tienes archivos estáticos que no están dentro de las carpetas 'static' de tus apps,
+# y que Django necesita recolectar para STATIC_ROOT, esta línea es para eso.
+# Por ejemplo, si tus activos de plantilla están en 'Biblioteca/static/'.
+STATICFILES_DIRS = [
+    BASE_DIR / 'Biblioteca' / 'static', # CORREGIDO: Uso de Path para consistencia y ruta
+]
+
+# Configuración de Whitenoise para servir archivos estáticos comprimidos y con caché
+# ¡Esta línea debe estar SIEMPRE definida si usas Whitenoise!
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# ELIMINADO: Las siguientes líneas duplicadas de MEDIA_URL y MEDIA_ROOT
+# que estaban causando conflicto con la configuración de S3:
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'Biblioteca/media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
