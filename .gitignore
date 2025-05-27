@@ -42,10 +42,6 @@ env/
 *.sqlite3
 BDD.Biblioteca.db   # <--- Importante: Si tu base de datos SQLite se llama así
 
-# Archivos generados en producción / temporales
-/staticfiles/       # Carpeta para archivos estáticos recolectados
-/media/             # Carpeta para archivos subidos por usuarios
-
 # Editor de texto / IDE
 .DS_Store           # macOS
 .vscode/            # Visual Studio Code
