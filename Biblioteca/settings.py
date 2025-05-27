@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Aplicaciones.Cursos',
-    # 'storages', # <--- COMENTADO: Desactiva el paquete storages si no usas S3
 ]
 
 MIDDLEWARE = [
@@ -151,27 +150,18 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 # ... (otras configuraciones, sin cambios) ...
 
-# # INICIO: CONFIGURACIÓN DE AWS S3 (COMENTADO)
-# ... (toda la configuración de AWS S3 debe seguir comentada) ...
-# # FIN: CONFIGURACIÓN DE AWS S3
-
-# INICIO: CONFIGURACIÓN DE ALMACENAMIENTO DE ARCHIVOS MEDIA LOCAL (TEMPORAL)
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-# MUY IMPORTANTE: Cambiamos MEDIA_URL y MEDIA_ROOT para que apunten a STATIC_ROOT
-# Esto hará que los archivos media se sirvan a través de /static/
-MEDIA_URL = '/static/media/' # Ahora los archivos media estarán en /static/media/
-MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media' # Apuntamos a una subcarpeta dentro de staticfiles
-# FIN: CONFIGURACIÓN DE ALMACENAMIENTO DE ARCHIVOS MEDIA LOCAL
+MEDIA_URL = '/static/media/'
+MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
+
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles' # Asegúrate de que esto siga igual
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Asegúrate de que tu STATICFILES_DIRS incluya la carpeta donde se guardarán los media,
-# aunque si MEDIA_ROOT está dentro de STATIC_ROOT, no es estrictamente necesario.
 STATICFILES_DIRS = [
     BASE_DIR / 'Biblioteca' / 'static',
-    # BASE_DIR / 'media', # Ya no es necesario si MEDIA_ROOT apunta a staticfiles
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
