@@ -13,6 +13,11 @@ import os
 from pathlib import Path
 from django.contrib.messages import constants as message_constants
 import dj_database_url # Necesario para la configuración de la base de datos
+from dotenv import load_dotenv # Importar para cargar variables de entorno desde .env
+
+# Cargar variables de entorno desde un archivo .env si existe (para desarrollo local)
+# Asegúrate de que .env esté en tu .gitignore para no subirlo a producción.
+load_dotenv()
 
 
 MESSAGE_TAGS = {
@@ -59,10 +64,10 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # Whitenoise ya no es necesario aquí si S3 va a servir los estáticos.
-    # Si deseas mantener Whitenoise para desarrollo local cuando DEBUG es True,
-    # puedes dejarlo, pero para producción con S3, es mejor quitarlo o envolverlo en un if DEBUG.
-    # 'whitenoise.middleware.WhiteNoiseMiddleware', # COMENTADO: Ya no es necesario si S3 sirve estáticos
+    # Whitenoise se debe usar SOLO si no estás sirviendo estáticos desde S3 en producción.
+    # Si DEBUG es True y quieres servir estáticos localmente sin S3, puedes descomentarlo.
+    # Para producción con S3, DEBE estar comentado o excluido.
+    # 'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -93,58 +98,93 @@ WSGI_APPLICATION = 'Biblioteca.wsgi.application'
 
 
 # **** INICIO: CONFIGURACIÓN DE AWS S3 PARA ARCHIVOS MEDIA Y ESTÁTICOS ****
-# Estas variables se leerán de las que configuraste en Render
+# Estas variables se leerán de las que configuraste en Render o de .env localmente
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 # Usamos tu región confirmada. Si es diferente, cámbiala aquí.
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-2')
 
-# ---> INICIO DEPURACIÓN TEMPORAL <---
+# ---> INICIO DEPURACIÓN AVANZADA Y CONDICIONAL <---
 # Estas líneas de "print" te ayudarán a ver si las variables de entorno se están cargando
-# correctamente en el entorno de Render. ¡Elimínalas una vez que todo funcione!
-print(f"DEBUG: AWS_ACCESS_KEY_ID cargado: {AWS_ACCESS_KEY_ID is not None}")
-print(f"DEBUG: AWS_SECRET_ACCESS_KEY cargado: {AWS_SECRET_ACCESS_KEY is not None}")
-print(f"DEBUG: AWS_STORAGE_BUCKET_NAME: '{AWS_STORAGE_BUCKET_NAME}'")
-print(f"DEBUG: AWS_S3_REGION_NAME: '{AWS_S3_REGION_NAME}'")
-# ---> FIN DEPURACIÓN TEMPORAL <---
+# correctamente. ¡Elimínalas una vez que todo funcione!
+
+# Solo imprime los detalles si las variables no se cargan correctamente para evitar logs excesivos
+if not AWS_ACCESS_KEY_ID:
+    print(f"DEBUG: AWS_ACCESS_KEY_ID está vacío o None. Valor: '{AWS_ACCESS_KEY_ID}'")
+else:
+    print(f"DEBUG: AWS_ACCESS_KEY_ID cargado correctamente (no vacío).")
+
+if not AWS_SECRET_ACCESS_KEY:
+    print(f"DEBUG: AWS_SECRET_ACCESS_KEY está vacío o None. Valor: '{AWS_SECRET_ACCESS_KEY}'")
+else:
+    print(f"DEBUG: AWS_SECRET_ACCESS_KEY cargado correctamente (no vacío).")
+
+if not AWS_STORAGE_BUCKET_NAME:
+    print(f"DEBUG: AWS_STORAGE_BUCKET_NAME está vacío o None. Valor: '{AWS_STORAGE_BUCKET_NAME}'")
+else:
+    print(f"DEBUG: AWS_STORAGE_BUCKET_NAME cargado correctamente. Bucket: '{AWS_STORAGE_BUCKET_NAME}'")
+
+if not AWS_S3_REGION_NAME:
+    print(f"DEBUG: AWS_S3_REGION_NAME está vacío o None. Valor: '{AWS_S3_REGION_NAME}'")
+else:
+    print(f"DEBUG: AWS_S3_REGION_NAME cargado correctamente. Región: '{AWS_S3_REGION_NAME}'")
+
+# ---> FIN DEPURACIÓN AVANZADA Y CONDICIONAL <---
 
 
 # Construye el dominio personalizado para S3. Esto es más robusto.
 AWS_S3_CUSTOM_DOMAIN = ''
-if AWS_STORAGE_BUCKET_NAME and AWS_S3_REGION_NAME:
+# Asegúrate de que las variables existan y no estén vacías antes de construir el dominio.
+if AWS_STORAGE_BUCKET_NAME and AWS_S3_REGION_NAME and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+    print(f"DEBUG: AWS_S3_CUSTOM_DOMAIN construido: {AWS_S3_CUSTOM_DOMAIN}")
 else:
     # Esto es solo una advertencia para desarrollo local si las variables no se cargan
+    # o si alguna falta para la configuración S3.
     if DEBUG: # Solo mostrar en modo DEBUG
-        print("ADVERTENCIA: Las variables de entorno de AWS para S3 no están completamente configuradas.")
-
-# Configuración adicional para S3
-AWS_S3_FILE_OVERWRITE = False # No permitir sobrescribir archivos con el mismo nombre por defecto
-AWS_DEFAULT_ACL = 'public-read' # ¡CRUCIAL! Hace que los archivos subidos sean públicamente legibles
-AWS_QUERYSTRING_AUTH = False # No genera URLs con firma si los archivos son públicos (ideal para archivos públicos)
-AWS_S3_VERIFY = True # Verificar certificados SSL para mayor seguridad
-
-# Define dónde se guardarán los archivos por defecto (¡en S3!)
-# Este es el almacenamiento por defecto para Model.FileField y Model.ImageField
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL base para tus archivos media en S3
-MEDIA_ROOT = '' # No es necesario definir MEDIA_ROOT cuando usas S3 como almacenamiento por defecto
+        print("ADVERTENCIA: Las variables de entorno de AWS para S3 NO están completamente configuradas, S3 NO se usará.")
+    # Si no hay credenciales, forzamos el uso de almacenamiento local para evitar errores.
+    # Esto es crucial para que collectstatic no falle en entornos donde las credenciales no están.
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    # También ajusta las URLs para que apunten localmente si S3 no se usa.
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
 
 
-# CAMBIO CLAVE: Configuración para archivos estáticos para que también usen S3
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-# La URL base para tus archivos estáticos ahora será en S3, dentro de la carpeta 'static/'
-STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+# Configuración adicional para S3 (solo se aplicará si las variables principales están cargadas)
+if AWS_S3_CUSTOM_DOMAIN: # Solo aplica estas settings si el dominio S3 se pudo construir
+    AWS_S3_FILE_OVERWRITE = False # No permitir sobrescribir archivos con el mismo nombre por defecto
+    AWS_DEFAULT_ACL = 'public-read' # ¡CRUCIAL! Hace que los archivos subidos sean públicamente legibles
+    AWS_QUERYSTRING_AUTH = False # No genera URLs con firma si los archivos son públicos (ideal para archivos públicos)
+    AWS_S3_VERIFY = True # Verificar certificados SSL para mayor seguridad
 
-# Define dónde se guardarán los archivos estáticos recolectados temporalmente antes de subirlos a S3.
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+    # Define dónde se guardarán los archivos por defecto (¡en S3!)
+    # Este es el almacenamiento por defecto para Model.FileField y Model.ImageField
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL base para tus archivos media en S3
+    MEDIA_ROOT = '' # No es necesario definir MEDIA_ROOT cuando usas S3 como almacenamiento por defecto
 
-# STATICFILES_DIRS sigue siendo útil para que collectstatic sepa dónde encontrar tus archivos estáticos
-# antes de subirlos a S3.
-STATICFILES_DIRS = [
-    BASE_DIR / 'Biblioteca' / 'static', # Esta es la ruta correcta según tu repositorio en GitHub
-]
+    # CAMBIO CLAVE: Configuración para archivos estáticos para que también usen S3
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    # La URL base para tus archivos estáticos ahora será en S3, dentro de la carpeta 'static/'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+
+    # Define dónde se guardarán los archivos estáticos recolectados temporalmente antes de subirlos a S3.
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+    # STATICFILES_DIRS sigue siendo útil para que collectstatic sepa dónde encontrar tus archivos estáticos
+    # antes de subirlos a S3.
+    STATICFILES_DIRS = [
+        BASE_DIR / 'Biblioteca' / 'static', # Esta es la ruta correcta según tu repositorio en GitHub
+    ]
+else:
+    # Configuración local si no se usa S3
+    STATIC_ROOT = BASE_DIR / 'staticfiles_local' # Un directorio diferente para evitar conflictos si pruebas S3
+    STATICFILES_DIRS = [
+        BASE_DIR / 'Biblioteca' / 'static',
+    ]
 # FIN: CONFIGURACIÓN DE AWS S3 PARA MEDIA Y ESTÁTICOS
 
 
