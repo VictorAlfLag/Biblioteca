@@ -121,14 +121,14 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL base para tus archivos media en S3
 MEDIA_ROOT = '' # No es necesario definir MEDIA_ROOT cuando usas S3 como almacenamiento por defecto
 
-# COMENTADO: Ya no es necesario si S3 sirve estáticos, Whitenoise se encargaba de esto.
-# STATIC_ROOT = BASE_DIR / 'staticfiles'
-
 
 # CAMBIO CLAVE: Configuración para archivos estáticos para que también usen S3
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # La URL base para tus archivos estáticos ahora será en S3, dentro de la carpeta 'static/'
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+
+# Define dónde se guardarán los archivos estáticos recolectados temporalmente antes de subirlos a S3.
+STATIC_ROOT = BASE_DIR / 'staticfiles' # <-- ESTA LÍNEA ES LA QUE SE DESCOMENTÓ/AGREGÓ
 
 # STATICFILES_DIRS sigue siendo útil para que collectstatic sepa dónde encontrar tus archivos estáticos
 # antes de subirlos a S3.
