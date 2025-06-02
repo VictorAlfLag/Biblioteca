@@ -12,8 +12,8 @@
 import os
 from pathlib import Path
 from django.contrib.messages import constants as message_constants
-import dj_database_url # Necesario para la configuración de la base de datos
-from dotenv import load_dotenv # Importar para cargar variables de entorno desde .env
+import dj_database_url
+from dotenv import load_dotenv
 
 # Cargar variables de entorno desde un archivo .env si existe (para desarrollo local)
 # Asegúrate de que .env esté en tu .gitignore para no subirlo a producción.
@@ -44,12 +44,12 @@ ALLOWED_HOSTS = []
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-ALLOWED_HOSTS += ['localhost', '127.0.0.1'] # Para desarrollo local
+ALLOWED_HOSTS += ['localhost', '127.0.0.1']
 
 
 # Application definition
-LOGIN_REDIRECT_URL = 'home'      # Página a la que se redirige después de iniciar sesión
-LOGOUT_REDIRECT_URL = 'login'    # Página a la que se redirige después de cerrar sesión
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Aplicaciones.Cursos',
-    'storages', # ¡Necesario para django-storages y AWS S3 para los archivos media!
+    'storages', # Necesario para django-storages y AWS S3 para los archivos media y estáticos
 ]
 
 MIDDLEWARE = [
@@ -67,7 +67,7 @@ MIDDLEWARE = [
     # Whitenoise se debe usar SOLO si no estás sirviendo estáticos desde S3 en producción.
     # Si DEBUG es True y quieres servir estáticos localmente sin S3, puedes descomentarlo.
     # Para producción con S3, DEBE estar comentado o excluido.
-    # 'whitenoise.middleware.WhiteNoiseMiddleware', 
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,8 +81,8 @@ ROOT_URLCONF = 'Biblioteca.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], # ### CAMBIO IMPORTANTE: Si tienes templates en la raíz del proyecto
-        'APP_DIRS': True, # Esto busca templates dentro de las carpetas 'templates' de tus apps
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -102,89 +102,71 @@ WSGI_APPLICATION = 'Biblioteca.wsgi.application'
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-# Usamos tu región confirmada. Si es diferente, cámbiala aquí.
-AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-2')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-2') # Tu región confirmada
 
-# ---> INICIO DEPURACIÓN AVANZADA Y CONDICIONAL <---
+# Inicializar STORAGE_TYPE como "local" por defecto
+STORAGE_TYPE = "local"
+
+# Cargar variables de entorno de depuración para ver si se usan
 # Estas líneas de "print" te ayudarán a ver si las variables de entorno se están cargando
 # correctamente. ¡Elimínalas una vez que todo funcione!
+print(f"DEBUG: AWS_ACCESS_KEY_ID cargado: {bool(AWS_ACCESS_KEY_ID)}")
+print(f"DEBUG: AWS_SECRET_ACCESS_KEY cargado: {bool(AWS_SECRET_ACCESS_KEY)}")
+print(f"DEBUG: AWS_STORAGE_BUCKET_NAME cargado: {AWS_STORAGE_BUCKET_NAME}")
+print(f"DEBUG: AWS_S3_REGION_NAME cargado: {AWS_S3_REGION_NAME}")
+print(f"DEBUG: DEBUG es: {DEBUG}")
 
-# Solo imprime los detalles si las variables no se cargan correctamente para evitar logs excesivos
-if not AWS_ACCESS_KEY_ID:
-    print(f"DEBUG: AWS_ACCESS_KEY_ID está vacío o None. Valor: '{AWS_ACCESS_KEY_ID}'")
-else:
-    print(f"DEBUG: AWS_ACCESS_KEY_ID cargado correctamente (no vacío).")
-
-if not AWS_SECRET_ACCESS_KEY:
-    print(f"DEBUG: AWS_SECRET_ACCESS_KEY está vacío o None. Valor: '{AWS_SECRET_ACCESS_KEY}'")
-else:
-    print(f"DEBUG: AWS_SECRET_ACCESS_KEY cargado correctamente (no vacío).")
-
-if not AWS_STORAGE_BUCKET_NAME:
-    print(f"DEBUG: AWS_STORAGE_BUCKET_NAME está vacío o None. Valor: '{AWS_STORAGE_BUCKET_NAME}'")
-else:
-    print(f"DEBUG: AWS_STORAGE_BUCKET_NAME cargado correctamente. Bucket: '{AWS_STORAGE_BUCKET_NAME}'")
-
-if not AWS_S3_REGION_NAME:
-    print(f"DEBUG: AWS_S3_REGION_NAME está vacío o None. Valor: '{AWS_S3_REGION_NAME}'")
-else:
-    print(f"DEBUG: AWS_S3_REGION_NAME cargado correctamente. Región: '{AWS_S3_REGION_NAME}'")
-
-# ---> FIN DEPURACIÓN AVANZADA Y CONDICIONAL <---
-
-
-# Construye el dominio personalizado para S3. Esto es más robusto.
-AWS_S3_CUSTOM_DOMAIN = ''
-# Asegúrate de que las variables existan y no estén vacías antes de construir el dominio.
-if AWS_STORAGE_BUCKET_NAME and AWS_S3_REGION_NAME and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+# Condición principal para usar S3:
+# Solo usaremos S3 si NO estamos en DEBUG (es decir, en producción)
+# Y si todas las variables de entorno de AWS están presentes.
+if not DEBUG and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME and AWS_S3_REGION_NAME:
+    STORAGE_TYPE = "s3"
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
-    print(f"DEBUG: AWS_S3_CUSTOM_DOMAIN construido: {AWS_S3_CUSTOM_DOMAIN}")
-else:
-    # Esto es solo una advertencia para desarrollo local si las variables no se cargan
-    # o si alguna falta para la configuración S3.
-    if DEBUG: # Solo mostrar en modo DEBUG
-        print("ADVERTENCIA: Las variables de entorno de AWS para S3 NO están completamente configuradas, S3 NO se usará.")
-    # Si no hay credenciales, forzamos el uso de almacenamiento local para evitar errores.
-    # Esto es crucial para que collectstatic no falle en entornos donde las credenciales no están.
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-    # También ajusta las URLs para que apunten localmente si S3 no se usa.
-    STATIC_URL = '/static/'
-    MEDIA_URL = '/media/'
+    print(f"DEBUG: Se usará AWS S3 para almacenamiento. Dominio: {AWS_S3_CUSTOM_DOMAIN}")
 
-
-# Configuración adicional para S3 (solo se aplicará si las variables principales están cargadas)
-if AWS_S3_CUSTOM_DOMAIN: # Solo aplica estas settings si el dominio S3 se pudo construir
     AWS_S3_FILE_OVERWRITE = False # No permitir sobrescribir archivos con el mismo nombre por defecto
     AWS_DEFAULT_ACL = 'public-read' # ¡CRUCIAL! Hace que los archivos subidos sean públicamente legibles
     AWS_QUERYSTRING_AUTH = False # No genera URLs con firma si los archivos son públicos (ideal para archivos públicos)
     AWS_S3_VERIFY = True # Verificar certificados SSL para mayor seguridad
 
-    # Define dónde se guardarán los archivos por defecto (¡en S3!)
+    # Configuración de almacenamiento para S3
     # Este es el almacenamiento por defecto para Model.FileField y Model.ImageField
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL base para tus archivos media en S3
-    MEDIA_ROOT = '' # No es necesario definir MEDIA_ROOT cuando usas S3 como almacenamiento por defecto
+    # Esta es la URL base para tus archivos media en S3
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    # No es necesario definir MEDIA_ROOT cuando usas S3 como almacenamiento por defecto
+    MEDIA_ROOT = ''
 
-    # CAMBIO CLAVE: Configuración para archivos estáticos para que también usen S3
+    # Configuración para archivos estáticos para que también usen S3
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     # La URL base para tus archivos estáticos ahora será en S3, dentro de la carpeta 'static/'
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 
     # Define dónde se guardarán los archivos estáticos recolectados temporalmente antes de subirlos a S3.
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
+    STATIC_ROOT = BASE_DIR / 'staticfiles_collected' # Nombre más descriptivo
 
-    # STATICFILES_DIRS sigue siendo útil para que collectstatic sepa dónde encontrar tus archivos estáticos
-    # antes de subirlos a S3.
-    STATICFILES_DIRS = [
-        BASE_DIR / 'Biblioteca' / 'static', # Esta es la ruta correcta según tu repositorio en GitHub
-    ]
 else:
-    # Configuración local si no se usa S3
+    # Si DEBUG es True, o faltan credenciales AWS, o STORAGE_TYPE no es "s3", usamos almacenamiento local.
+    STORAGE_TYPE = "local"
+    print(f"DEBUG: Se usará almacenamiento LOCAL. DEBUG: {DEBUG}, Credenciales AWS_ACCESS_KEY_ID presentes: {bool(AWS_ACCESS_KEY_ID)}")
+
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+
     STATIC_ROOT = BASE_DIR / 'staticfiles_local' # Un directorio diferente para evitar conflictos si pruebas S3
-    STATICFILES_DIRS = [
-        BASE_DIR / 'Biblioteca' / 'static',
-    ]
+    MEDIA_ROOT = BASE_DIR / 'media_local' # Define un MEDIA_ROOT local si no se usa S3
+
+
+# STATICFILES_DIRS es donde Django busca los archivos estáticos antes de collectstatic
+# Esto se aplica tanto si usas S3 como si no.
+STATICFILES_DIRS = [
+    BASE_DIR / 'Biblioteca' / 'static', # Esta es la ruta correcta según tu repositorio en GitHub
+    # Puedes añadir más directorios si tienes archivos estáticos en otras apps.
+]
+
 # FIN: CONFIGURACIÓN DE AWS S3 PARA MEDIA Y ESTÁTICOS
 
 
