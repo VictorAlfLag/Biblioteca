@@ -100,6 +100,16 @@ AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 # Usamos tu región confirmada. Si es diferente, cámbiala aquí.
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-2')
 
+# ---> INICIO DEPURACIÓN TEMPORAL <---
+# Estas líneas de "print" te ayudarán a ver si las variables de entorno se están cargando
+# correctamente en el entorno de Render. ¡Elimínalas una vez que todo funcione!
+print(f"DEBUG: AWS_ACCESS_KEY_ID cargado: {AWS_ACCESS_KEY_ID is not None}")
+print(f"DEBUG: AWS_SECRET_ACCESS_KEY cargado: {AWS_SECRET_ACCESS_KEY is not None}")
+print(f"DEBUG: AWS_STORAGE_BUCKET_NAME: '{AWS_STORAGE_BUCKET_NAME}'")
+print(f"DEBUG: AWS_S3_REGION_NAME: '{AWS_S3_REGION_NAME}'")
+# ---> FIN DEPURACIÓN TEMPORAL <---
+
+
 # Construye el dominio personalizado para S3. Esto es más robusto.
 AWS_S3_CUSTOM_DOMAIN = ''
 if AWS_STORAGE_BUCKET_NAME and AWS_S3_REGION_NAME:
