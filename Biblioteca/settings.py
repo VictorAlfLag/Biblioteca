@@ -168,17 +168,11 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 # Static files (CSS, JavaScript, Images de la plantilla)
 # Whitenoise se encargará de servir estos archivos desde STATIC_ROOT.
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles' # Directorio donde 'python manage.py collectstatic' copiará los archivos estáticos
-
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
-    BASE_DIR / 'Biblioteca' / 'static', # Esta ruta es CORRECTA según tu estructura de archivos
-    # ### CAMBIO IMPORTANTE: Si tienes otras carpetas estáticas fuera de tus apps, agrégalas aquí.
-    # Por ejemplo: BASE_DIR / 'otra_carpeta_estatica',
+    BASE_DIR / 'Biblioteca' / 'static', # This is correct based on your images
 ]
-
-# Whitenoise se encargará de servir los archivos estáticos comprimidos y con manifiesto
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
