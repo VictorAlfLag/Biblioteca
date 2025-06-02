@@ -6,11 +6,11 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+# dist/  <-- COMENTA ESTA LÍNEA
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/   <-- COMENTA ESTA LÍNEA (si sospechas que ignora tus librerías)
 lib64/
 parts/
 sdist/
@@ -31,25 +31,8 @@ venv/
 env/
 /bin/
 /include/
-/lib/
+# /lib/ <-- ASEGURATE QUE ESTA ESTE COMENTADA O QUE SEA MAS ESPECIFICA PARA EL ENTORNO VIRTUAL
 /Scripts/
 /local/
 
-# Django
-*.log
-*.pot
-*.squash-migrations
-*.sqlite3
-BDD.Biblioteca.db 
-
-# Archivos estáticos recolectados para producción
-staticfiles/  # <--- ¡Añade esta línea!
-
-# Editor de texto / IDE
-.DS_Store 
-.vscode/ 
-.idea/ 
-*.sublime-project
-*.sublime-workspace
-*.swp
-*~
+# ... el resto de tu .gitignore ...

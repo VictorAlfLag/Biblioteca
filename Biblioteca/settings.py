@@ -59,8 +59,10 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # Whitenoise debe ir aquí, después de SecurityMiddleware para servir estáticos
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # Whitenoise ya no es necesario aquí si S3 va a servir los estáticos.
+    # Si deseas mantener Whitenoise para desarrollo local cuando DEBUG es True,
+    # puedes dejarlo, pero para producción con S3, es mejor quitarlo o envolverlo en un if DEBUG.
+    # 'whitenoise.middleware.WhiteNoiseMiddleware', # COMENTADO: Ya no es necesario si S3 sirve estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -90,7 +92,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'Biblioteca.wsgi.application'
 
 
-# **** INICIO: CONFIGURACIÓN DE AWS S3 PARA ARCHIVOS MEDIA (SUBIDOS POR USUARIOS) ****
+# **** INICIO: CONFIGURACIÓN DE AWS S3 PARA ARCHIVOS MEDIA Y ESTÁTICOS ****
 # Estas variables se leerán de las que configuraste en Render
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
@@ -105,7 +107,7 @@ if AWS_STORAGE_BUCKET_NAME and AWS_S3_REGION_NAME:
 else:
     # Esto es solo una advertencia para desarrollo local si las variables no se cargan
     if DEBUG: # Solo mostrar en modo DEBUG
-        print("ADVERTENCIA: Las variables de entorno de AWS para S3 no están completamente configuradas (solo para media).")
+        print("ADVERTENCIA: Las variables de entorno de AWS para S3 no están completamente configuradas.")
 
 # Configuración adicional para S3
 AWS_S3_FILE_OVERWRITE = False # No permitir sobrescribir archivos con el mismo nombre por defecto
@@ -119,7 +121,22 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL base para tus archivos media en S3
 MEDIA_ROOT = '' # No es necesario definir MEDIA_ROOT cuando usas S3 como almacenamiento por defecto
 
-# FIN: CONFIGURACIÓN DE AWS S3 PARA MEDIA
+# COMENTADO: Ya no es necesario si S3 sirve estáticos, Whitenoise se encargaba de esto.
+# STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+
+# CAMBIO CLAVE: Configuración para archivos estáticos para que también usen S3
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# La URL base para tus archivos estáticos ahora será en S3, dentro de la carpeta 'static/'
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+
+# STATICFILES_DIRS sigue siendo útil para que collectstatic sepa dónde encontrar tus archivos estáticos
+# antes de subirlos a S3.
+STATICFILES_DIRS = [
+    BASE_DIR / 'Biblioteca' / 'static',
+]
+
+# FIN: CONFIGURACIÓN DE AWS S3 PARA MEDIA Y ESTÁTICOS
 
 
 DATABASES = {
@@ -164,15 +181,6 @@ USE_TZ = True
 # Agregar configuración de mensajes
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-
-# Static files (CSS, JavaScript, Images de la plantilla)
-# Whitenoise se encargará de servir estos archivos desde STATIC_ROOT.
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [
-    BASE_DIR / 'Biblioteca' / 'static', # This is correct based on your images
-]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
