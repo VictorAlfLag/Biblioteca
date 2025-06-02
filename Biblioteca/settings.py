@@ -42,8 +42,8 @@ ALLOWED_HOSTS += ['localhost', '127.0.0.1'] # Para desarrollo local
 
 
 # Application definition
-LOGIN_REDIRECT_URL = 'home'     # Página a la que se redirige después de iniciar sesión
-LOGOUT_REDIRECT_URL = 'login'   # Página a la que se redirige después de cerrar sesión
+LOGIN_REDIRECT_URL = 'home'      # Página a la que se redirige después de iniciar sesión
+LOGOUT_REDIRECT_URL = 'login'    # Página a la que se redirige después de cerrar sesión
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Aplicaciones.Cursos',
+    'storages', # <--- ¡AGREGADO! Necesario para django-storages y AWS S3
 ]
 
 MIDDLEWARE = [
@@ -86,25 +87,36 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Biblioteca.wsgi.application'
 
-# # INICIO: CONFIGURACIÓN DE AWS S3 (COMENTADO PARA ALMACENAMIENTO LOCAL TEMPORAL)
-# AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-# AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-# AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-# AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-2') # Confirma esta región
+# **** INICIO: CONFIGURACIÓN DE AWS S3 PARA ARCHIVOS MEDIA (SUBIDOS POR USUARIOS) ****
+# Estas variables se leerán de las que configuraste en Render
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+# Usamos tu región confirmada: us-east-2
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-2')
 
-# AWS_DEFAULT_ACL = 'public-read' # Muy importante para que los archivos sean legibles públicamente
-# AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+# Construye el dominio personalizado para S3. Esto es más robusto.
+AWS_S3_CUSTOM_DOMAIN = ''
+if AWS_STORAGE_BUCKET_NAME and AWS_S3_REGION_NAME:
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+else:
+    # Esto es solo una advertencia para desarrollo local si las variables no se cargan
+    if DEBUG: # Solo mostrar en modo DEBUG
+        print("ADVERTENCIA: Las variables de entorno de AWS para S3 no están completamente configuradas.")
 
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' # Usa S3 para media
-# MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL base para S3
-# # FIN: CONFIGURACIÓN DE AWS S3
+# Configuración adicional para S3
+AWS_S3_FILE_OVERWRITE = False # No permitir sobrescribir archivos con el mismo nombre por defecto
+AWS_DEFAULT_ACL = 'public-read' # ¡CRUCIAL! Hace que los archivos subidos sean públicamente legibles
+AWS_QUERYSTRING_AUTH = False # No genera URLs con firma si los archivos son públicos (ideal para archivos públicos)
+AWS_S3_VERIFY = True # Verificar certificados SSL para mayor seguridad
 
-# INICIO: CONFIGURACIÓN DE ALMACENAMIENTO DE ARCHIVOS MEDIA LOCAL (TEMPORAL)
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-# FIN: CONFIGURACIÓN DE ALMACENAMIENTO DE ARCHIVOS MEDIA LOCAL
+# Define dónde se guardarán los archivos por defecto (¡en S3!)
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' # Esta es la URL base para tus archivos media en S3
+MEDIA_ROOT = '' # No es necesario definir MEDIA_ROOT cuando usas S3 como almacenamiento por defecto
 
+# FIN: CONFIGURACIÓN DE AWS S3
+# HEMOS ELIMINADO EL BLOQUE DE ALMACENAMIENTO LOCAL TEMPORAL PARA EVITAR CONFLICTOS.
 
 DATABASES = {
     'default': dj_database_url.config(
@@ -148,22 +160,21 @@ USE_TZ = True
 # Agregar configuración de mensajes
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-# ... (otras configuraciones, sin cambios) ...
 
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-MEDIA_URL = '/static/media/'
-MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
-
-
-# Static files (CSS, JavaScript, Images)
+# Static files (CSS, JavaScript, Images de la plantilla)
+# Whitenoise se encargará de servir estos archivos desde STATIC_ROOT.
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = BASE_DIR / 'staticfiles' # Directorio donde 'python manage.py collectstatic' copiará los archivos estáticos
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'Biblioteca' / 'static',
+    BASE_DIR / 'Biblioteca' / 'static', # Asegúrate de que esta ruta sea correcta para tus archivos estáticos
+    # Aquí puedes añadir más rutas si tienes otros directorios estáticos fuera de tus apps
 ]
 
+# Whitenoise se encargará de servir los archivos estáticos comprimidos y con manifiesto
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# ... (el resto del settings.py, sin cambios) ...
+# Default primary key field type
+# https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
