@@ -128,12 +128,13 @@ STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 
 # Define dónde se guardarán los archivos estáticos recolectados temporalmente antes de subirlos a S3.
-STATIC_ROOT = BASE_DIR / 'staticfiles' # <-- ESTA LÍNEA ES LA QUE SE DESCOMENTÓ/AGREGÓ
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # STATICFILES_DIRS sigue siendo útil para que collectstatic sepa dónde encontrar tus archivos estáticos
 # antes de subirlos a S3.
 STATICFILES_DIRS = [
-    BASE_DIR / 'Biblioteca' / 'static',
+    # ESTA ES LA LÍNEA MODIFICADA:
+    BASE_DIR / 'static', # Confirma que tu carpeta 'static' está en la raíz del proyecto
 ]
 
 # FIN: CONFIGURACIÓN DE AWS S3 PARA MEDIA Y ESTÁTICOS
