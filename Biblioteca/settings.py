@@ -133,10 +133,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # STATICFILES_DIRS sigue siendo útil para que collectstatic sepa dónde encontrar tus archivos estáticos
 # antes de subirlos a S3.
 STATICFILES_DIRS = [
-    # ESTA ES LA LÍNEA MODIFICADA:
-    BASE_DIR / 'static', # Confirma que tu carpeta 'static' está en la raíz del proyecto
+    BASE_DIR / 'Biblioteca' / 'static', # Esta es la ruta correcta según tu repositorio en GitHub
 ]
-
 # FIN: CONFIGURACIÓN DE AWS S3 PARA MEDIA Y ESTÁTICOS
 
 
